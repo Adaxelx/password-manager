@@ -1,11 +1,14 @@
 import express from 'express'
+import {PrismaClient} from '@prisma/client'
 
+const prisma = new PrismaClient()
 const app = express()
 
 app.use(express.json())
 
 app.get('/', async (req, res) => {
-  res.json({gitara: 'siema'})
+  const allUsers = await prisma.user.findMany()
+  res.json(allUsers)
 })
 
 app.listen(8000, () => {
