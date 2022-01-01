@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "overrideConfig.parserOptions": {
+  "parserOptions": {
     "ecmaVersion": 2019,
     "sourceType": "module",
     "ecmaFeatures": {
