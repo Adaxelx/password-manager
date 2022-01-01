@@ -1,5 +1,9 @@
-import {UserCredentials} from 'core/User'
-import {loginUser as loginUserDA} from '../repositories/UserRepository'
+import {User, UserCredentials} from 'core/User'
+import {
+  loginUser as loginUserR,
+  registerUser as registerUserR,
+} from '../repositories/UserRepository'
+import {checkIfValidData} from '../../utils/helpers'
 import jwt from 'jsonwebtoken'
 
 function generateAccessToken(email: string) {
@@ -12,7 +16,7 @@ function generateAccessToken(email: string) {
 
 export const loginUser = async (credentials: UserCredentials) => {
   try {
-    const isLoggedIn = await loginUserDA(credentials)
+    const isLoggedIn = await loginUserR(credentials)
     const {email} = credentials
     if (isLoggedIn) {
       const token = generateAccessToken(email)
@@ -20,6 +24,22 @@ export const loginUser = async (credentials: UserCredentials) => {
         return token
       }
     }
+  } catch (err) {
+    throw err
+  }
+}
+
+export const registerUser = async (user: User) => {
+  try {
+    const userResponse = await registerUserR(user)
+
+    if (checkIfValidData<User>(userResponse)) {
+      const token = generateAccessToken(userResponse.email)
+      if (token) {
+        return {token, user: userResponse}
+      }
+    }
+    return userResponse
   } catch (err) {
     throw err
   }

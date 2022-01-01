@@ -6,6 +6,6 @@
     "outDir": "./build",
     "esModuleInterop": true,
     "strict": true,
-    "baseUrl": "./src"
+    "baseUrl": "src"
   }
 }

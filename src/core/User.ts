@@ -1,9 +1,7 @@
-export type User = {
-  id: number
-  name: string
-} & UserCredentials
+import {User as PrismaUser} from '.prisma/client'
 
-export type UserCredentials = {
-  email: string
-  password: string
-}
+export type UserDTO = PrismaUser
+
+export type User = Omit<PrismaUser, 'id'>
+
+export type UserCredentials = Omit<PrismaUser, 'id' | 'name'>
