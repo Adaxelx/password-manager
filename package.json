@@ -15,7 +15,9 @@
     "format": "npm run prettier -- --write",
     "check-format": "npm run prettier -- --list-different",
     "validate": "npm-run-all --parallel check-types check-format lint build",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "db:reset": "prisma migrate reset",
+    "db:seed": "npx prisma db seed"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
   },
   "homepage": "https://github.com/Adaxelx/bookclub-BE#readme",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.6",
     "@types/node": "^17.0.6",
@@ -57,6 +60,7 @@
   },
   "dependencies": {
     "@prisma/client": "^3.7.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1"
