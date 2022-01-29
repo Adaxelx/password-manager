@@ -4,6 +4,8 @@ import {checkIfValidData} from '../utils/helpers'
 import {
   addPassword,
   sharePassword,
+  decryptPassword,
+  getUserPasswords,
 } from '../infrastructure/repositories/PasswordRepository'
 import {authorizeUser} from '../utils/auth'
 
@@ -12,7 +14,7 @@ const router = Router()
 router.post('/:id/password', authorizeUser, async (req, res) => {
   const {name, password, key} = req.body
   const creatorId = parseInt(req.params.id)
-  const credentials = {name, password, key}
+
   try {
     const response = await addPassword({
       passwordData: {name, password, creatorId},
@@ -26,14 +28,63 @@ router.post('/:id/password', authorizeUser, async (req, res) => {
       res.json(response)
     }
   } catch (err) {
-    res.status(404)
-    res.json({message: 'User doesnt exist.'})
+    res.status(500)
+    res.json({message: 'Wystąpił błąd'})
+  }
+})
+
+router.post(
+  '/:id/password/:passId/decrypt',
+  authorizeUser,
+  async (req, res) => {
+    const {key} = req.body
+    const passwordId = parseInt(req.params.passId)
+    const userId = parseInt(req.params.id)
+    try {
+      const response = await decryptPassword({
+        key,
+        passwordId,
+        userId,
+      })
+      if (checkIfValidData<{password: string}>(response)) {
+        res.status(200)
+        res.json(response)
+      } else if (response) {
+        res.status(400)
+        res.json({message: response})
+      } else {
+        res.status(400)
+        res.json({message: 'Wystąpił błąd'})
+      }
+    } catch (err) {
+      res.status(500)
+      res.json({message: 'Wystąpił błąd'})
+    }
+  },
+)
+
+router.get('/:id/password/', authorizeUser, async (req, res) => {
+  const userId = parseInt(req.params.id)
+  try {
+    const response = await getUserPasswords({
+      userId,
+    })
+    if (checkIfValidData<Password[]>(response)) {
+      res.status(200)
+      res.json(response.map(({iv, ...rest}) => rest))
+    } else {
+      res.status(500)
+      res.json({message: 'Wystąpił błąd'})
+    }
+  } catch (err) {
+    console.log(err)
+    res.status(500)
+    res.json({message: 'Wystąpił błąd'})
   }
 })
 
 router.put('/:id/password/:passId/share', authorizeUser, async (req, res) => {
   const {userId} = req.body
-  const creatorId = parseInt(req.params.id)
   const passwordId = parseInt(req.params.passId)
   try {
     const response = await sharePassword({
@@ -48,8 +99,8 @@ router.put('/:id/password/:passId/share', authorizeUser, async (req, res) => {
       res.json(response)
     }
   } catch (err) {
-    res.status(404)
-    res.json({message: 'User doesnt exist.'})
+    res.status(500)
+    res.json({message: 'Wystąpił błąd'})
   }
 })
 

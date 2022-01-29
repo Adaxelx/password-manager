@@ -7,6 +7,7 @@ const keyToBytes = (key: string) =>
   ])
 
 const validateKey = (key: string) => {
+  console.log(key)
   if (/\s/.test(key)) {
     return 'Klucz nie moze zawierać spacji.'
   } else if (Buffer.byteLength(key) > 24) {
@@ -31,6 +32,7 @@ export const encrypt = (data: string, key: string) => {
 }
 
 export const decrypt = (encrypted: string, key: string, iv: Buffer) => {
+  console.log(key)
   const validation = validateKey(key)
   if (validation) {
     return validation

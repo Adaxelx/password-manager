@@ -9,7 +9,10 @@ if (!pepper || !hashRounds) {
 }
 
 export function checkIfValidData<T>(data: any): data is T {
-  return typeof data === 'object' && !Array.isArray(data) && data
+  if (Array.isArray(data)) {
+    return data.every(item => checkIfValidData(item))
+  }
+  return typeof data === 'object' && data
 }
 
 export const hashData = (dataPassed: string) => {
