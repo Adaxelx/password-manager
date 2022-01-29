@@ -76,12 +76,9 @@ router.put('/password/change', authorizeUser, async (req, res, next) => {
       res.json({message: response})
       return
     }
-    return
   } catch (err) {
-    console.log(err)
     res.status(404)
     res.json({message: "Can't create user."})
-    return
   }
 })
 
@@ -91,23 +88,29 @@ router.put('/restore', async (req, res) => {
 
   try {
     const response = await checkIfUserCanRestore(user)
+
     if (typeof response === 'string') {
-      res.status(400)
-      res.json({message: response})
-      return
-    }
-    const responseChange = await changePassword({login, password})
-    if (checkIfValidData<UserChangeResponse>(responseChange)) {
-      res.status(200)
-      res.json(responseChange)
-    } else if (responseChange) {
-      res.status(400)
-      res.json({message: responseChange})
+      setTimeout(() => {
+        res.status(400)
+        res.json({message: response})
+      }, 1000)
+    } else {
+      const responseChange = await changePassword({login, password})
+      setTimeout(() => {
+        if (checkIfValidData<UserChangeResponse>(responseChange)) {
+          res.status(200)
+          res.json(responseChange)
+        } else if (responseChange) {
+          res.status(400)
+          res.json({message: responseChange})
+        }
+      }, 1000)
     }
   } catch (err) {
-    console.log(err)
-    res.status(404)
-    res.json({message: "Can't create user."})
+    setTimeout(() => {
+      res.status(404)
+      res.json({message: "Can't create user."})
+    })
   }
 })
 

@@ -21,10 +21,11 @@ model User {
 model Password {
   id        Int      @id @default(autoincrement())
   password  String
+  name      String
   allowedUsers  PasswordsOnUsers[]
   creator User @relation(fields: [creatorId], references: [id])
   creatorId Int
-  iv    String
+  iv    Bytes
 }
 
 model PasswordsOnUsers{
