@@ -8,8 +8,27 @@ generator client {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String
-  password String
+  id        Int      @id @default(autoincrement())
+  login     String   @unique
+  password  String
+  salt      String?
+  passwords PasswordsOnUsers[]
+  cretedPasswords Password[]
+}
+
+model Password {
+  id        Int      @id @default(autoincrement())
+  password  String
+  allowedUsers  PasswordsOnUsers[]
+  creator User @relation(fields: [creatorId], references: [id])
+  creatorId Int
+}
+
+model PasswordsOnUsers{
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  password Password @relation(fields: [passwordId], references: [id])
+  passwordId Int
+
+  @@id([userId, passwordId])
 }

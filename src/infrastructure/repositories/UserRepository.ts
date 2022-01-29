@@ -1,14 +1,14 @@
-import {User, UserCredentials} from 'core/User'
+import {User, UserWithoutSalt} from 'core/User'
 import {PrismaClient} from '@prisma/client'
 import {compareData, hashData} from '../../utils/helpers'
 
 const prisma = new PrismaClient()
 
-export const loginUser = async ({email, password}: UserCredentials) => {
+export const loginUser = async ({login, password}: UserWithoutSalt) => {
   try {
-    const user = await prisma.user.findUnique({where: {email}})
+    const user = await prisma.user.findUnique({where: {login}})
 
-    if (user && compareData(password, user.password)) {
+    if (user && compareData({password, salt: user.salt}, user.password)) {
       return true
     }
     return false
@@ -17,18 +17,18 @@ export const loginUser = async ({email, password}: UserCredentials) => {
   }
 }
 
-export const registerUser = async (userData: User) => {
-  const {email, password, name} = userData
-  const passwordHashed = hashData(password)
+export const registerUser = async (userData: UserWithoutSalt) => {
+  const {login, password: initPassword} = userData
+  const {password, salt} = hashData(initPassword)
   try {
-    const existingUser = await prisma.user.findUnique({where: {email}})
+    const existingUser = await prisma.user.findUnique({where: {login}})
     if (existingUser) {
       return 'exist'
     }
     const user = await prisma.user.create({
-      data: {...userData, password: passwordHashed},
+      data: {...userData, password, salt},
     })
-    return {id: user.id, email: user.email, name: user.name}
+    return {id: user.id, login: user.login}
   } catch (err) {
     return false
   }

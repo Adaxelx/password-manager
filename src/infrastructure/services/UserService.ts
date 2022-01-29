@@ -1,4 +1,4 @@
-import {User, UserCredentials} from 'core/User'
+import {User, UserWithoutSalt} from 'core/User'
 import {
   loginUser as loginUserR,
   registerUser as registerUserR,
@@ -14,12 +14,12 @@ function generateAccessToken(email: string) {
   }
 }
 
-export const loginUser = async (credentials: UserCredentials) => {
+export const loginUser = async (credentials: UserWithoutSalt) => {
   try {
     const isLoggedIn = await loginUserR(credentials)
-    const {email} = credentials
+    const {login} = credentials
     if (isLoggedIn) {
-      const token = generateAccessToken(email)
+      const token = generateAccessToken(login)
       if (token) {
         return token
       }
@@ -29,12 +29,12 @@ export const loginUser = async (credentials: UserCredentials) => {
   }
 }
 
-export const registerUser = async (user: User) => {
+export const registerUser = async (user: UserWithoutSalt) => {
   try {
     const userResponse = await registerUserR(user)
 
     if (checkIfValidData<User>(userResponse)) {
-      const token = generateAccessToken(userResponse.email)
+      const token = generateAccessToken(userResponse.login)
       if (token) {
         return {token, user: userResponse}
       }
