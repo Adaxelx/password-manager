@@ -4,6 +4,10 @@ export type UserDTO = PrismaUser
 
 export type User = Omit<PrismaUser, 'id'>
 
-export type UserWithoutSalt = Omit<PrismaUser, 'id' | 'salt'>
+export type UserCredentials = Pick<PrismaUser, 'login' | 'password'>
 
-export type UserPasswordData = Omit<PrismaUser, 'login' | 'id'>
+export type UserPasswordData = Pick<PrismaUser, 'password' | 'salt'>
+
+export type UserWithKey = Pick<PrismaUser, 'login' | 'restorationKey'>
+
+export type UserChangeResponse = {restorationKey: string; message: string}

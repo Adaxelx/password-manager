@@ -8,11 +8,13 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  login     String   @unique
-  password  String
-  salt      String?
-  passwords PasswordsOnUsers[]
+  id              Int      @id @default(autoincrement())
+  login           String   @unique
+  password        String
+  salt            String
+  restorationKey  String
+  restorationSalt String
+  passwords       PasswordsOnUsers[]
   cretedPasswords Password[]
 }
 
@@ -22,6 +24,7 @@ model Password {
   allowedUsers  PasswordsOnUsers[]
   creator User @relation(fields: [creatorId], references: [id])
   creatorId Int
+  iv    String
 }
 
 model PasswordsOnUsers{
@@ -29,6 +32,5 @@ model PasswordsOnUsers{
   userId Int
   password Password @relation(fields: [passwordId], references: [id])
   passwordId Int
-
   @@id([userId, passwordId])
 }

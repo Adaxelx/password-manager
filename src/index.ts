@@ -11,7 +11,9 @@ app.use(express.json())
 app.use('/user', userRoutes)
 app.get('/', async (req, res) => {
   const allUsers = await prisma.user.findMany()
-  res.json(allUsers)
+  const allPassOnUser = await prisma.passwordsOnUsers.findMany()
+  const allPasswords = await prisma.password.findMany()
+  res.json({allUsers, allPassOnUser, allPasswords})
 })
 
 app.listen(8000, () => {
