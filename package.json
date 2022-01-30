@@ -32,6 +32,7 @@
   "homepage": "https://github.com/Adaxelx/bookclub-BE#readme",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.6",
     "@types/node": "^17.0.6",
@@ -61,6 +62,7 @@
   },
   "dependencies": {
     "@prisma/client": "^3.7.0",
+    "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1"

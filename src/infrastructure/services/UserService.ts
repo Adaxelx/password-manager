@@ -17,13 +17,17 @@ function generateAccessToken(login: string) {
 export const loginUser = async (credentials: UserCredentials) => {
   try {
     const isLoggedIn = await loginUserR(credentials)
-    const {login} = credentials
-    if (isLoggedIn) {
+
+    if (isLoggedIn && isLoggedIn?.login) {
+      const {id, login, failedLogin} = isLoggedIn
       const token = generateAccessToken(login)
       if (token) {
-        return token
+        return {token, id, login, failedLogin}
       }
+    } else if (isLoggedIn) {
+      return {failedLogin: isLoggedIn.failedLogin}
     }
+    return false
   } catch (err) {
     throw err
   }
@@ -33,10 +37,12 @@ export const registerUser = async (user: UserCredentials) => {
   try {
     const userResponse = await registerUserR(user)
 
-    if (checkIfValidData<User & {regenerationCode: string}>(userResponse)) {
+    if (
+      checkIfValidData<Pick<User, 'restorationKey' | 'login'>>(userResponse)
+    ) {
       const token = generateAccessToken(userResponse.login)
       if (token) {
-        return {token, user: userResponse}
+        return {token, ...userResponse}
       }
     }
     return userResponse

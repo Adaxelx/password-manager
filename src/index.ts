@@ -4,11 +4,18 @@ import dotenv from 'dotenv'
 import userRoutes from './routes/user'
 import passwordRoutes from './routes/password'
 dotenv.config()
-
+import cors from 'cors'
+import path from 'path'
 const prisma = new PrismaClient()
 const app = express()
 
 app.use(express.json())
+app.use(cors())
+
+// add middlewares
+const root = require('path').join(__dirname, '../build')
+app.use(express.static(root))
+
 app.use('/user', userRoutes)
 app.use('/user', passwordRoutes)
 app.get('/', async (req, res) => {

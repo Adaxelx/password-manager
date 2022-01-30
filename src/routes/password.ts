@@ -6,6 +6,7 @@ import {
   sharePassword,
   decryptPassword,
   getUserPasswords,
+  deletePassword,
 } from '../infrastructure/repositories/PasswordRepository'
 import {authorizeUser} from '../utils/auth'
 
@@ -63,7 +64,7 @@ router.post(
   },
 )
 
-router.get('/:id/password/', authorizeUser, async (req, res) => {
+router.get('/:id/password', authorizeUser, async (req, res) => {
   const userId = parseInt(req.params.id)
   try {
     const response = await getUserPasswords({
@@ -71,13 +72,12 @@ router.get('/:id/password/', authorizeUser, async (req, res) => {
     })
     if (checkIfValidData<Password[]>(response)) {
       res.status(200)
-      res.json(response.map(({iv, ...rest}) => rest))
+      res.json(response.map(({iv, password, ...rest}) => rest))
     } else {
       res.status(500)
       res.json({message: 'Wystąpił błąd'})
     }
   } catch (err) {
-    console.log(err)
     res.status(500)
     res.json({message: 'Wystąpił błąd'})
   }
@@ -96,7 +96,34 @@ router.put('/:id/password/:passId/share', authorizeUser, async (req, res) => {
       res.json({message: 'Pomyślnie udostępniono hasło.'})
     } else {
       res.status(400)
-      res.json(response)
+      res.json({
+        message:
+          'Nie znaleziono użytkownika lub uzytkownik ma już dostęp do hasła.',
+      })
+    }
+  } catch (err) {
+    res.status(500)
+    res.json({message: 'Wystąpił błąd'})
+  }
+})
+
+router.delete('/:id/password/:passId', authorizeUser, async (req, res) => {
+  const userId = parseInt(req.params.id)
+  const passwordId = parseInt(req.params.passId)
+  try {
+    const response = await deletePassword({
+      userId,
+      passwordId,
+    })
+    if (checkIfValidData<Password>(response)) {
+      res.status(200)
+      res.json({message: 'Pomyślnie usunięto hasło.'})
+    } else if (response) {
+      res.status(400)
+      res.json({message: response})
+    } else {
+      res.status(400)
+      res.json({message: 'Nie znaleziono hasła.'})
     }
   } catch (err) {
     res.status(500)

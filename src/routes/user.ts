@@ -1,4 +1,4 @@
-import {User, UserChangeResponse, UserCredentials} from 'core/User'
+import {User, UserChangeResponse} from 'core/User'
 import {Router} from 'express'
 import {checkIfValidData} from '../utils/helpers'
 import {authenticateUser, authorizeUser} from '../utils/auth'
@@ -14,20 +14,28 @@ router.post('/login', async (req, res) => {
   const {login, password} = req.body
   const credentials = {login, password}
   try {
-    const token = await loginUser(credentials)
-    setTimeout(() => {
-      if (token) {
+    const data = await loginUser(credentials)
+    if (data && data.login) {
+      setTimeout(() => {
+        const {token, failedLogin, ...user} = data
         res.status(200)
-        res.json({token})
-      } else {
+        res.json({token, user})
+      }, 1000)
+    } else if (data) {
+      setTimeout(() => {
         res.status(404)
-        res.json({message: 'User doesnt exist.'})
-      }
-    }, 1000)
+        res.json({message: 'Złe dane logowania'})
+      }, 1000 + Math.min(data?.failedLogin, 3) * 1000)
+    } else {
+      setTimeout(() => {
+        res.status(404)
+        res.json({message: 'Złe dane logowania'})
+      }, 2000)
+    }
   } catch (err) {
     setTimeout(() => {
       res.status(404)
-      res.json({message: 'User doesnt exist.'})
+      res.json({message: 'Złe dane logowania'})
     }, 1000)
   }
 })
@@ -45,22 +53,26 @@ router.post('/register', async (req, res) => {
   }
   try {
     const response = await registerUser(user)
-    if (checkIfValidData<UserCredentials>(response)) {
+    if (
+      checkIfValidData<
+        Pick<User, 'restorationKey' | 'login'> & {token: string}
+      >(response)
+    ) {
+      const {token, ...user} = response
       res.status(200)
-      res.json(response)
+      res.json({token, user})
     } else if (response) {
       res.status(400)
-      res.json({message: 'User exist in database.'})
+      res.json({message: 'Istnieje uzytkownik z takim loginem.'})
     }
   } catch (err) {
-    console.log(err)
     res.status(404)
     res.json({message: "Can't create user."})
   }
 })
 
 router.put('/password/change', authorizeUser, async (req, res, next) => {
-  const {login, password} = req.body
+  const {login, password, oldPassword} = req.body
   const user = {login, password}
 
   try {
@@ -69,7 +81,6 @@ router.put('/password/change', authorizeUser, async (req, res, next) => {
     if (checkIfValidData<UserChangeResponse>(response)) {
       res.status(200)
       res.json(response)
-
       return
     } else if (response) {
       res.status(400)

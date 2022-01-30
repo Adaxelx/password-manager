@@ -132,3 +132,40 @@ export const getUserPasswords = async ({userId}: UserPassword) => {
     return false
   }
 }
+
+export const deletePassword = async ({
+  userId,
+  passwordId,
+}: SharedPasswordProps) => {
+  try {
+    const password = await prisma.password.findFirst({
+      where: {
+        id: passwordId,
+      },
+    })
+
+    if (password?.creatorId !== userId) {
+      const response = await prisma.passwordsOnUsers.delete({
+        where: {
+          userId_passwordId: {userId, passwordId},
+        },
+      })
+      return response
+    } else {
+      await prisma.passwordsOnUsers.deleteMany({
+        where: {
+          passwordId,
+        },
+      })
+
+      const deleted = await prisma.password.delete({
+        where: {
+          id: passwordId,
+        },
+      })
+      return deleted
+    }
+  } catch (err) {
+    return false
+  }
+}

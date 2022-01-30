@@ -15,7 +15,18 @@ export const loginUser = async ({login, password}: UserCredentials) => {
     const user = await prisma.user.findUnique({where: {login}})
 
     if (user && compareData({password, salt: user.salt}, user.password)) {
-      return true
+      await prisma.user.update({
+        where: {login},
+        data: {failedLogin: 0},
+      })
+
+      return {id: user.id, login: user.login, failedLogin: 0}
+    } else if (user) {
+      await prisma.user.update({
+        where: {login},
+        data: {failedLogin: user?.failedLogin + 1},
+      })
+      return {failedLogin: user?.failedLogin + 1}
     }
     return false
   } catch (err) {
@@ -40,6 +51,7 @@ export const registerUser = async (userData: UserCredentials) => {
         salt,
         restorationKey: restorationKeyHash,
         restorationSalt,
+        failedLogin: 0,
       },
     })
     return {id: user.id, login: user.login, restorationKey}
