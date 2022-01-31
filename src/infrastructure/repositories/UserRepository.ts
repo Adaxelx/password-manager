@@ -81,6 +81,29 @@ export const checkIfUserCanRestore = async ({
   }
 }
 
+const notFoundUser = 'Nie ma takiego uzytkownika.'
+
+export const changePasswordWithCheck = async ({
+  login,
+  password,
+  oldPassword,
+}: UserCredentials & {oldPassword: string}) => {
+  try {
+    const user = await prisma.user.findUnique({where: {login}})
+
+    if (
+      user &&
+      compareData({password: oldPassword, salt: user.salt}, user.password)
+    ) {
+      return await changePassword({login, password})
+    } else {
+      return 'Nieprawidłowe stare hasło'
+    }
+  } catch (err) {
+    return notFoundUser
+  }
+}
+
 export const changePassword = async ({
   login,
   password: initPassword,
@@ -104,10 +127,10 @@ export const changePassword = async ({
     })
 
     if (!user) {
-      return 'Nie ma takiego użytkownika.'
+      return notFoundUser
     }
     return {restorationKey, message: 'Pomyślnie zmieninono hasło.'}
   } catch (err) {
-    return 'Nie ma takiego uzytkownika.'
+    return notFoundUser
   }
 }

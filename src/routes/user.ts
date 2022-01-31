@@ -7,6 +7,7 @@ import {loginUser, registerUser} from '../infrastructure/services/UserService'
 import {
   changePassword,
   checkIfUserCanRestore,
+  changePasswordWithCheck,
 } from '../infrastructure/repositories/UserRepository'
 const router = Router()
 
@@ -73,10 +74,10 @@ router.post('/register', async (req, res) => {
 
 router.put('/password/change', authorizeUser, async (req, res, next) => {
   const {login, password, oldPassword} = req.body
-  const user = {login, password}
+  const user = {login, password, oldPassword}
 
   try {
-    const response = await changePassword(user)
+    const response = await changePasswordWithCheck(user)
 
     if (checkIfValidData<UserChangeResponse>(response)) {
       res.status(200)
